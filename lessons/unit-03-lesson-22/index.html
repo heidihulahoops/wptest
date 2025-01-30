@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IDS UCLA</title>
+  <meta name="robots" content="max-image-preview:large">
+	<style>img:is([sizes="auto" i], [sizes^="auto," i]) { contain-intrinsic-size: 3000px 1500px }</style>
+	<script type="text/javascript">
+/* <![CDATA[ */
+window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/15.0.3\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/15.0.3\/svg\/","svgExt":".svg","source":{"wpemoji":"\/wp-includes\/js\/wp-emoji.js?ver=6.7.1","twemoji":"\/wp-includes\/js\/twemoji.js?ver=6.7.1"}};
+/**
+ * @output wp-includes/js/wp-emoji-loader.js
+ */
+
+/**
+ * Emoji Settings as exported in PHP via _print_emoji_detection_script().
+ * @typedef WPEmojiSettings
+ * @type {object}
+ * @property {?object} source
+ * @property {?string} source.concatemoji
+ * @property {?string} source.twemoji
+ * @property {?string} source.wpemoji
+ * @property {?boolean} DOMReady
+ * @property {?Function} readyCallback
+ */
+
+/**
+ * Support tests.
+ * @typedef SupportTests
+ * @type {object}
+ * @property {?boolean} flag
+ * @property {?boolean} emoji
+ */
+
+/**
+ * IIFE to detect emoji support and load Twemoji if needed.
+ *
+ * @param {Window} window
+ * @param {Document} document
+ * @param {WPEmojiSettings} settings
+ */
+( function wpEmojiLoader( window, document, settings ) {
+	if ( typeof Promise === 'undefined' ) {
+		return;
+	}
+
+	var sessionStorageKey = 'wpEmojiSettingsSupports';
+	var tests = [ 'flag', 'emoji' ];
+
+	/**
+	 * Checks whether the browser supports offloading to a Worker.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @private
+	 *
+	 * @returns {boolean}
+	 */
+	function supportsWorkerOffloading() {
+		return (
+			typeof Worker !== 'undefined' &&
+			typeof OffscreenCanvas !== 'undefined' &&
+			typeof URL !== 'undefined' &&
+			URL.createObjectURL &&
+			typeof Blob !== 'undefined'
+		);
+	}
+
+	/**
+	 * @typedef SessionSupportTests
+	 * @type {object}
+	 * @property {number} timestamp
+	 * @property {SupportTests} supportTests
+	 */
+
+	/**
+	 * Get support tests from session.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @private
+	 *
+	 * @returns {?SupportTests} Support tests, or null if not set or older than 1 week.
+	 */
+	function getSessionSupportTests() {
+		try {
+			/** @type {SessionSupportTests} */
+			var item = JSON.parse(
+				sessionStorage.getItem( sessionStorageKey )
+			);
+			if (
+				typeof item === 'object' &&
+				typeof item.timestamp === 'number' &&
+				new Date().valueOf() < item.timestamp + 604800 && // Note: Number is a week in seconds.
+				typeof item.supportTests === 'object'
+			) {
+				return item.supportTests;
+			}
+		} catch ( e ) {}
+		return null;
+	}
+
+	/**
+	 * Persist the supports in session storage.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @private
+	 *
+	 * @param {SupportTests} supportTests Support tests.
+	 */
+	function setSessionSupportTests( supportTests ) {
+		try {
+			/** @type {SessionSupportTests} */
+			var item = {
+				supportTests: supportTests,
+				timestamp: new Date().valueOf()
+			};
+
+			sessionStorage.setItem(
+				sessionStorageKey,
+				JSON.stringify( item )
+			);
+		} catch ( e ) {}
+	}
+
+	/**
+	 * Checks if two sets of Emoji characters render the same visually.
+	 *
+	 * This function may be serialized to run in a Worker. Therefore, it cannot refer to variables from the containing
+	 * scope. Everything must be passed by parameters.
+	 *
+	 * @since 4.9.0
+	 *
+	 * @private
+	 *
+	 * @param {CanvasRenderingContext2D} context 2D Context.
+	 * @param {string} set1 Set of Emoji to test.
+	 * @param {string} set2 Set of Emoji to test.
+	 *
+	 * @return {boolean} True if the two sets render the same.
+	 */
+	function emojiSetsRenderIdentically( context, set1, set2 ) {
+		// Cleanup from previous test.
+		context.clearRect( 0, 0, context.canvas.width, context.canvas.height );
+		context.fillText( set1, 0, 0 );
+		var rendered1 = new Uint32Array(
+			context.getImageData(
+				0,
+				0,
+				context.canvas.width,
+				context.canvas.height
+			).data
+		);
+
+		// Cleanup from previous test.
+		context.clearRect( 0, 0, context.canvas.width, context.canvas.height );
+		context.fillText( set2, 0, 0 );
+		var rendered2 = new Uint32Array(
+			context.getImageData(
+				0,
+				0,
+				context.canvas.width,
+				context.canvas.height
+			).data
+		);
+
+		return rendered1.every( function ( rendered2Data, index ) {
+			return rendered2Data === rendered2[ index ];
+		} );
+	}
+
+	/**
+	 * Determines if the browser properly renders Emoji that Twemoji can supplement.
+	 *
+	 * This function may be serialized to run in a Worker. Therefore, it cannot refer to variables from the containing
+	 * scope. Everything must be passed by parameters.
+	 *
+	 * @since 4.2.0
+	 *
+	 * @private
+	 *
+	 * @param {CanvasRenderingContext2D} context 2D Context.
+	 * @param {string} type Whether to test for support of "flag" or "emoji".
+	 * @param {Function} emojiSetsRenderIdentically Reference to emojiSetsRenderIdentically function, needed due to minification.
+	 *
+	 * @return {boolean} True if the browser can render emoji, false if it cannot.
+	 */
+	function browserSupportsEmoji( context, type, emojiSetsRenderIdentically ) {
+		var isIdentical;
+
+		switch ( type ) {
+			case 'flag':
+				/*
+				 * Test for Transgender flag compatibility. Added in Unicode 13.
+				 *
+				 * To test for support, we try to render it, and compare the rendering to how it would look if
+				 * the browser doesn't render it correctly (white flag emoji + transgender symbol).
+				 */
+				isIdentical = emojiSetsRenderIdentically(
+					context,
+					'🏳️‍⚧️', // as a zero-width joiner sequence
+					'🏳️​⚧️' // separated by a zero-width space
+				);
+
+				if ( isIdentical ) {
+					return false;
+				}
+
+				/*
+				 * Test for UN flag compatibility. This is the least supported of the letter locale flags,
+				 * so gives us an easy test for full support.
+				 *
+				 * To test for support, we try to render it, and compare the rendering to how it would look if
+				 * the browser doesn't render it correctly ([U] + [N]).
+				 */
+				isIdentical = emojiSetsRenderIdentically(
+					context,
+					'🇺🇳', // as the sequence of two code points
+					'🇺​🇳' // as the two code points separated by a zero-width space
+				);
+
+				if ( isIdentical ) {
+					return false;
+				}
+
+				/*
+				 * Test for English flag compatibility. England is a country in the United Kingdom, it
+				 * does not have a two letter locale code but rather a five letter sub-division code.
+				 *
+				 * To test for support, we try to render it, and compare the rendering to how it would look if
+				 * the browser doesn't render it correctly (black flag emoji + [G] + [B] + [E] + [N] + [G]).
+				 */
+				isIdentical = emojiSetsRenderIdentically(
+					context,
+					// as the flag sequence
+					'🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+					// with each code point separated by a zero-width space
+					'🏴​󠁧​󠁢​󠁥​󠁮​󠁧​󠁿'
+				);
+
+				return ! isIdentical;
+			case 'emoji':
+				/*
+				 * Four and twenty blackbirds baked in a pie.
+				 *
+				 * To test for Emoji 15.0 support, try to render a new emoji: Blackbird.
+				 *
+				 * The Blackbird is a ZWJ sequence combining 🐦 Bird and ⬛ large black square.,
+				 *
+				 * 0x1F426 (🐦) == Bird
+				 * 0x200D == Zero-Width Joiner (ZWJ) that links the code points for the new emoji or
+				 * 0x200B == Zero-Width Space (ZWS) that is rendered for clients not supporting the new emoji.
+				 * 0x2B1B == Large Black Square
+				 *
+				 * When updating this test for future Emoji releases, ensure that individual emoji that make up the
+				 * sequence come from older emoji standards.
+				 */
+				isIdentical = emojiSetsRenderIdentically(
+					context,
+					'🐦‍⬛', // as the zero-width joiner sequence
+					'🐦​⬛' // separated by a zero-width space
+				);
+
+				return ! isIdentical;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Checks emoji support tests.
+	 *
+	 * This function may be serialized to run in a Worker. Therefore, it cannot refer to variables from the containing
+	 * scope. Everything must be passed by parameters.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @private
+	 *
+	 * @param {string[]} tests Tests.
+	 * @param {Function} browserSupportsEmoji Reference to browserSupportsEmoji function, needed due to minification.
+	 * @param {Function} emojiSetsRenderIdentically Reference to emojiSetsRenderIdentically function, needed due to minification.
+	 *
+	 * @return {SupportTests} Support tests.
+	 */
+	function testEmojiSupports( tests, browserSupportsEmoji, emojiSetsRenderIdentically ) {
+		var canvas;
+		if (
+			typeof WorkerGlobalScope !== 'undefined' &&
+			self instanceof WorkerGlobalScope
+		) {
+			canvas = new OffscreenCanvas( 300, 150 ); // Dimensions are default for HTMLCanvasElement.
+		} else {
+			canvas = document.createElement( 'canvas' );
+		}
+
+		var context = canvas.getContext( '2d', { willReadFrequently: true } );
+
+		/*
+		 * Chrome on OS X added native emoji rendering in M41. Unfortunately,
+		 * it doesn't work when the font is bolder than 500 weight. So, we
+		 * check for bold rendering support to avoid invisible emoji in Chrome.
+		 */
+		context.textBaseline = 'top';
+		context.font = '600 32px Arial';
+
+		var supports = {};
+		tests.forEach( function ( test ) {
+			supports[ test ] = browserSupportsEmoji( context, test, emojiSetsRenderIdentically );
+		} );
+		return supports;
+	}
+
+	/**
+	 * Adds a script to the head of the document.
+	 *
+	 * @ignore
+	 *
+	 * @since 4.2.0
+	 *
+	 * @param {string} src The url where the script is located.
+	 *
+	 * @return {void}
+	 */
+	function addScript( src ) {
+		var script = document.createElement( 'script' );
+		script.src = src;
+		script.defer = true;
+		document.head.appendChild( script );
+	}
+
+	settings.supports = {
+		everything: true,
+		everythingExceptFlag: true
+	};
+
+	// Create a promise for DOMContentLoaded since the worker logic may finish after the event has fired.
+	var domReadyPromise = new Promise( function ( resolve ) {
+		document.addEventListener( 'DOMContentLoaded', resolve, {
+			once: true
+		} );
+	} );
+
+	// Obtain the emoji support from the browser, asynchronously when possible.
+	new Promise( function ( resolve ) {
+		var supportTests = getSessionSupportTests();
+		if ( supportTests ) {
+			resolve( supportTests );
+			return;
+		}
+
+		if ( supportsWorkerOffloading() ) {
+			try {
+				// Note that the functions are being passed as arguments due to minification.
+				var workerScript =
+					'postMessage(' +
+					testEmojiSupports.toString() +
+					'(' +
+					[
+						JSON.stringify( tests ),
+						browserSupportsEmoji.toString(),
+						emojiSetsRenderIdentically.toString()
+					].join( ',' ) +
+					'));';
+				var blob = new Blob( [ workerScript ], {
+					type: 'text/javascript'
+				} );
+				var worker = new Worker( URL.createObjectURL( blob ), { name: 'wpTestEmojiSupports' } );
+				worker.onmessage = function ( event ) {
+					supportTests = event.data;
+					setSessionSupportTests( supportTests );
+					worker.terminate();
+					resolve( supportTests );
+				};
+				return;
+			} catch ( e ) {}
+		}
+
+		supportTests = testEmojiSupports( tests, browserSupportsEmoji, emojiSetsRenderIdentically );
+		setSessionSupportTests( supportTests );
+		resolve( supportTests );
+	} )
+		// Once the browser emoji support has been obtained from the session, finalize the settings.
+		.then( function ( supportTests ) {
+			/*
+			 * Tests the browser support for flag emojis and other emojis, and adjusts the
+			 * support settings accordingly.
+			 */
+			for ( var test in supportTests ) {
+				settings.supports[ test ] = supportTests[ test ];
+
+				settings.supports.everything =
+					settings.supports.everything && settings.supports[ test ];
+
+				if ( 'flag' !== test ) {
+					settings.supports.everythingExceptFlag =
+						settings.supports.everythingExceptFlag &&
+						settings.supports[ test ];
+				}
+			}
+
+			settings.supports.everythingExceptFlag =
+				settings.supports.everythingExceptFlag &&
+				! settings.supports.flag;
+
+			// Sets DOMReady to false and assigns a ready function to settings.
+			settings.DOMReady = false;
+			settings.readyCallback = function () {
+				settings.DOMReady = true;
+			};
+		} )
+		.then( function () {
+			return domReadyPromise;
+		} )
+		.then( function () {
+			// When the browser can not render everything we need to load a polyfill.
+			if ( ! settings.supports.everything ) {
+				settings.readyCallback();
+
+				var src = settings.source || {};
+
+				if ( src.concatemoji ) {
+					addScript( src.concatemoji );
+				} else if ( src.wpemoji && src.twemoji ) {
+					addScript( src.twemoji );
+					addScript( src.wpemoji );
+				}
+			}
+		} );
+} )( window, document, window._wpemojiSettings );
+
+/* ]]> */
+</script>
+<style id="wp-emoji-styles-inline-css" type="text/css">img.wp-smiley, img.emoji {
+		display: inline !important;
+		border: none !important;
+		box-shadow: none !important;
+		height: 1em !important;
+		width: 1em !important;
+		margin: 0 0.07em !important;
+		vertical-align: -0.1em !important;
+		background: none !important;
+		padding: 0 !important;
+	}</style>
+<link rel="stylesheet" id="wp-block-library-css" href="/wp-includes/css/dist/block-library/style.css?ver=6.7.1" type="text/css" media="all">
+<style id="classic-theme-styles-inline-css" type="text/css">/**
+ * These rules are needed for backwards compatibility.
+ * They should match the button element rules in the base theme.json file.
+ */
+.wp-block-button__link {
+	color: #ffffff;
+	background-color: #32373c;
+	border-radius: 9999px; /* 100% causes an oval, but any explicit but really high value retains the pill shape. */
+
+	/* This needs a low specificity so it won't override the rules from the button element if defined in theme.json. */
+	box-shadow: none;
+	text-decoration: none;
+
+	/* The extra 2px are added to size solids the same as the outline versions.*/
+	padding: calc(0.667em + 2px) calc(1.333em + 2px);
+
+	font-size: 1.125em;
+}
+
+.wp-block-file__button {
+	background: #32373c;
+	color: #ffffff;
+	text-decoration: none;
+}</style>
+<style id="global-styles-inline-css" type="text/css">:root{--wp--preset--aspect-ratio--square: 1;--wp--preset--aspect-ratio--4-3: 4/3;--wp--preset--aspect-ratio--3-4: 3/4;--wp--preset--aspect-ratio--3-2: 3/2;--wp--preset--aspect-ratio--2-3: 2/3;--wp--preset--aspect-ratio--16-9: 16/9;--wp--preset--aspect-ratio--9-16: 9/16;--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgba(6,147,227,1) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgba(252,185,0,1) 0%,rgba(255,105,0,1) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgba(255,105,0,1) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: 20px;--wp--preset--font-size--large: 36px;--wp--preset--font-size--x-large: 42px;--wp--preset--spacing--20: 0.44rem;--wp--preset--spacing--30: 0.67rem;--wp--preset--spacing--40: 1rem;--wp--preset--spacing--50: 1.5rem;--wp--preset--spacing--60: 2.25rem;--wp--preset--spacing--70: 3.38rem;--wp--preset--spacing--80: 5.06rem;--wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2);--wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4);--wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2);--wp--preset--shadow--outlined: 6px 6px 0px -3px rgba(255, 255, 255, 1), 6px 6px rgba(0, 0, 0, 1);--wp--preset--shadow--crisp: 6px 6px 0px rgba(0, 0, 0, 1);}:where(.is-layout-flex){gap: 0.5em;}:where(.is-layout-grid){gap: 0.5em;}body .is-layout-flex{display: flex;}.is-layout-flex{flex-wrap: wrap;align-items: center;}.is-layout-flex > :is(*, div){margin: 0;}body .is-layout-grid{display: grid;}.is-layout-grid > :is(*, div){margin: 0;}:where(.wp-block-columns.is-layout-flex){gap: 2em;}:where(.wp-block-columns.is-layout-grid){gap: 2em;}:where(.wp-block-post-template.is-layout-flex){gap: 1.25em;}:where(.wp-block-post-template.is-layout-grid){gap: 1.25em;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}
+:where(.wp-block-post-template.is-layout-flex){gap: 1.25em;}:where(.wp-block-post-template.is-layout-grid){gap: 1.25em;}
+:where(.wp-block-columns.is-layout-flex){gap: 2em;}:where(.wp-block-columns.is-layout-grid){gap: 2em;}
+:root :where(.wp-block-pullquote){font-size: 1.5em;line-height: 1.6;}</style>
+<link rel="stylesheet" id="theme-styles-css" href="/wp-content/themes/ids-ucla/assets/styles/styles.css?ver=6.7.1" type="text/css" media="all">
+<link rel="stylesheet" id="tailwind-css" href="/wp-content/themes/ids-ucla/dist/output.css?ver=6.7.1" type="text/css" media="all">
+<link rel="stylesheet" id="prismjs-styles-css" href="/wp-content/themes/ids-ucla/assets/styles/prism.css?ver=6.7.1" type="text/css" media="all">
+<script type="text/javascript" src="/wp-includes/js/jquery/jquery.js?ver=3.7.1" id="jquery-core-js"></script>
+<script type="text/javascript" src="/wp-includes/js/jquery/jquery-migrate.js?ver=3.4.1" id="jquery-migrate-js"></script>
+<script type="text/javascript" src="/wp-content/themes/ids-ucla/assets/js/prism.js?ver=6.7.1" id="prismjs-js"></script>
+<link rel="https://api.w.org/" href="/wp-json/">
+<link rel="alternate" title="JSON" type="application/json" href="/wp-json/wp/v2/lessons/767">
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="/xmlrpc.php?rsd">
+<meta name="generator" content="WordPress 6.7.1">
+<link rel="canonical" href="/lessons/unit-03-lesson-22/">
+<link rel="shortlink" href="/?p=767">
+<link rel="alternate" title="oEmbed (JSON)" type="application/json+oembed" href="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Flessons%2Funit-03-lesson-22%2F">
+<link rel="alternate" title="oEmbed (XML)" type="text/xml+oembed" href="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Flessons%2Funit-03-lesson-22%2F#038;format=xml">
+</head>
+
+<body class="lessons-template-default single single-lessons postid-767">
+  
+
+  <header class="header">
+    <div class="hero-section">
+      <div class="hero bg-bottom" style="background-image: url('/wp-content/themes/ids-ucla/assets/images/hero-image.png')">
+        <img class="w-[150px] mb-[20px]" alt="">
+        <h1 class="hero-title text-white">Introduction To Data Science</h1>
+      </div>
+      <div class="sub-hero max-w-[1100px]" style="background-image: url('/wp-content/themes/ids-ucla/assets/images/sub-hero-image.png')">
+        <div class="sub-hero-title">
+          <span class="text-[#ffffff99]">  Unit 03 &#8211; Lesson 22</span>
+          <h2 class="text-white w-[70%] font-[500]">
+            Changing Orientation          </h2>
+          <p class="text-[#ffffff99]">
+                      </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <script>//Sidebar
+    window.onload = (event) => {
+      button = document.querySelector('#sidebar_button input')
+      button.addEventListener('click', () => {
+        if (button.checked == false) {
+          document.querySelector('#sidebar').classList.add('sidebar_hidden')
+        } else {
+          document.querySelector('#sidebar').classList.remove('sidebar_hidden')
+        }
+      })
+
+      window.addEventListener('resize', resize);
+
+      function resize() {
+        if (screen.width < 1024) {
+          document.querySelector('#sidebar').classList.add('sidebar_hidden')
+        } else {
+          document.querySelector('#sidebar').classList.remove('sidebar_hidden')
+        }
+      }
+      resize()
+    };</script>
+<main class="container max-w-[1100px] flex gap-10 relative lg:overflow-x-visible overflow-x-hidden xl:px-0 md:px-[50px] px-[0px]">
+     <div id="sidebar" class="lg:mb-[9rem] lg:w-1/4 w-[240px] absolute top-[20px] lg:relative" style="left:0px; transition: all 0.3s cubic-bezier(0.4, 0, 1, 1);">
+        <div class="content-side-bar lg:relative relative top-[15%] xl:top-0 w-[240px] bg-white rounded-[15px]  shadow-md lg:shadow-none z-50">
+    <div id="sidebar_button" class=" absolute w-[30px] h-[40px] bg-primary r-0  right-[-30px] rotate-180 top-[5%] rounded-l-[20px] lg:hidden">
+        <input type="checkbox" class="w-[30px] h-[40px] opacity-0 absolute z-20">
+        <img src="/wp-content/themes/ids-ucla/assets/images/chevron-left.svg" alt="sidebar arrow" class="absolute top-[8px] w-[25px] h-[25px] right-0" style="filter: invert(100%);">
+    </div>
+    <div class="menu-side-menu-container"><ul id="menu-side-menu" class="menu">
+<li id="menu-item-399" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-399"><a href="/">Home</a></li>
+</ul></div>
+</div>
+
+<script>let items = document.querySelectorAll(".menu-item-has-children a")
+    items.forEach((a) => {
+        a.addEventListener("click", (event) => {
+            let parent = a.parentElement;
+            parent.querySelector("ul").classList.toggle("show");
+            parent.classList.toggle("rotate");
+        })
+    })
+
+    // disable Herf to some items in the menu
+    let menuItems = document.querySelectorAll(".menu-item-has-children a")
+    let reult = menuItems.forEach((item) => {
+        item.removeAttribute("href")
+
+    })</script>    </div>
+    <div class="blocks-content w-full lg:w-3/4 test">
+<div id="Objective" class="text-content block-content bullet">
+    <h3>Objective</h3>
+    <div class="text-content">
+        <p>Students will learn how to convert XML files to the more familiar data table format and vice versa.</p>
+    </div>
+</div>
+<div id="Materials" class="text-content block-content bullet">
+    <h3>Materials</h3>
+    <div class="text-content">
+        <ol>
+<li>
+<em>There and Back Again: From XML to Data Tables</em> handout (<a href="/wp-content/uploads/2024/07/LMR_U3_L22_A.pdf">LMR_U3_L22_A</a>)</li>
+<li>
+<em>There and Back Again: From Data Tables to XML</em> handout (<a href="/wp-content/uploads/2024/07/LMR_U3_L22_B.pdf">LMR_U3_L22_B</a>)</li>
+</ol>
+    </div>
+</div>
+<div id="" class="text-content-with-container block-content bullet">
+    <h3></h3>
+    <div class="text-container">
+        <div class="px-[25px] py-[10px] rounded-t-[5px]" style="background-color: #e59b24">
+            <span class="text-white text-lg">
+                <img class="inline mr-[10px] mt-[-3px]" src="/wp-content/themes/ids-ucla/assets/images/warning.svg" alt="">
+                Essential Concepts            </span>
+        </div>
+        <div class="border border-[#bbbbbb8f]  py-[25px] px-[20px] lg:py-[50px] lg:px-[40px] rounded-b-[5px] text-[18px]">
+            <p>Converting XML to spreadsheet format helps us better understand and view our data.</p>
+        </div>
+    </div>
+</div>
+<div id="Lesson" class="text-content block-content bullet">
+    <h3>Lesson</h3>
+    <ul class="text-content flex   flex-col flex-nowrap gap-x-[18px] gap-y-[20px]" style="margin-left: 0px;">
+                    <li class="flex flex-row gap-x-[15px] lg:gap-x-[40px] items-start w-full" style="list-style:none;">
+                <div class="w-[10%] lg:w-[8%]">
+                                    </div>
+                <div class="flex w-[90%] lg:w-[92%] gap-x-[20px]">
+                                            <span>
+                            1.
+                        </span>
+                                        <div class="list-content flex flex-col w-fit">
+                        <p>Take a few minutes to compare the structure of XML code to HTML data tables (refer to Step 7 from Lesson 21).</p>
+                    </div>
+                </div>
+            </li>
+                    <li class="flex flex-row gap-x-[15px] lg:gap-x-[40px] items-start w-full" style="list-style:none;">
+                <div class="w-[10%] lg:w-[8%]">
+                                    </div>
+                <div class="flex w-[90%] lg:w-[92%] gap-x-[20px]">
+                                            <span>
+                            2.
+                        </span>
+                                        <div class="list-content flex flex-col w-fit">
+                        <p>Inform students that in today’s lesson, they will learn how to translate information from XML code into a data table.</p>
+                    </div>
+                </div>
+            </li>
+                    <li class="flex flex-row gap-x-[15px] lg:gap-x-[40px] items-start w-full" style="list-style:none;">
+                <div class="w-[10%] lg:w-[8%]">
+                                    </div>
+                <div class="flex w-[90%] lg:w-[92%] gap-x-[20px]">
+                                            <span>
+                            3.
+                        </span>
+                                        <div class="list-content flex flex-col w-fit">
+                        <p>Distribute the<em> There and Back Again: From XML to Data Tables</em> handout (<a href="/wp-content/uploads/2024/07/LMR_U3_L22_A.pdf">LMR_U3_L22_A</a>) to students.<br>
+<strong><u>Note:</u></strong> Provide an electronic copy of <a href="/wp-content/uploads/2024/07/LMR_U3_L22_A.pdf">LMR_U3_L22_A</a> for students to easily copy/paste the code later in the lesson.</p>
+                    </div>
+                </div>
+            </li>
+            </ul>
+</div>
+<div id="" class="text-content block-content mt-[-5rem]">
+    <h3></h3>
+    <div class="text-content">
+            </div>
+    <figure class="flex justify-center">
+        <img class="image-content" src="/wp-content/uploads/2024/04/lmr_u3_l22_a.png" alt="">
+    </figure>
+</div>
+<div id="" class="text-content block-content bullet">
+    <h3></h3>
+    <ul class="text-content flex   flex-col flex-nowrap gap-x-[18px] gap-y-[20px]" style="margin-left: 0px;">
+                    <li class="flex flex-row gap-x-[15px] lg:gap-x-[40px] items-start w-full" style="list-style:none;">
+                <div class="w-[10%] lg:w-[8%]">
+                                    </div>
+                <div class="flex w-[90%] lg:w-[92%] gap-x-[20px]">
+                                            <span>
+                            4.
+                        </span>
+                                        <div class="list-content flex flex-col w-fit">
+                        <p>Inform the students that XML code is provided on page 1 of the handout, and their goal is to transfer all the information to the empty data table.<br>
+<strong><u>Note:</u></strong> It may be helpful to create a new RScript for the process.</p>
+                    </div>
+                </div>
+            </li>
+                    <li class="flex flex-row gap-x-[15px] lg:gap-x-[40px] items-start w-full" style="list-style:none;">
+                <div class="w-[10%] lg:w-[8%]">
+                                    </div>
+                <div class="flex w-[90%] lg:w-[92%] gap-x-[20px]">
+                                            <span>
+                            5.
+                        </span>
+                                        <div class="list-content flex flex-col w-fit">
+                        <p>Load the XML package by running the following code:</p>
+<p><span style="font-size: 18px; color: #21437f; font-weight: bold; font-family: Consolas;"><strong>library(&#8220;XML&#8221;)</strong></span></p>
+                    </div>
+                </div>
+            </li>
+                    <li class="flex flex-row gap-x-[15px] lg:gap-x-[40px] items-start w-full" style="list-style:none;">
+                <div class="w-[10%] lg:w-[8%]">
+                                    </div>
+                <div class="flex w-[90%] lg:w-[92%] gap-x-[20px]">
+                                            <span>
+                            6.
+                        </span>
+                                        <div class="list-content flex flex-col w-fit">
+                        <p>Next, assign the data the name volunteers and copy/paste the code within quotes. Verify that it is in your Environment.</p>
+                    </div>
+                </div>
+            </li>
+            </ul>
+</div>
+<div id="" class="text-content block-content mt-[-5rem]">
+    <h3></h3>
+    <div class="text-content pb-[50px]">
+            </div>
+    <div class="relative">
+        <button class="code_button" onclick="copy(this)">Copy code</button>
+        <pre class="code-container">
+            <code class="code-content language-html">
+                </code>
+        </pre>
+    </div>
+</div>
+
+<div id="" class="text-content block-content bullet">
+    <h3></h3>
+    <ul class="text-content flex   flex-col flex-nowrap gap-x-[18px] gap-y-[20px]" style="margin-left: 0px;">
+                    <li class="flex flex-row gap-x-[15px] lg:gap-x-[40px] items-start w-full" style="list-style:none;">
+                <div class="w-[10%] lg:w-[8%]">
+                                    </div>
+                <div class="flex w-[90%] lg:w-[92%] gap-x-[20px]">
+                                            <span>
+                            7.
+                        </span>
+                                        <div class="list-content flex flex-col w-fit">
+                        <p>Ask students: &#8220;How does our data look? Can we analyze it?&#8221; <span style="font-size: 18px; color: #acacad; font-weight: bold;"><strong><em>Answers will vary but students should notice that RStudio/Posit Cloud is displaying it in XML format (</em></strong><strong>\n<em> means new line).</em></strong></span></p>
+                    </div>
+                </div>
+            </li>
+            </ul>
+</div>
+<div id="" class="text-content block-content mt-[-5rem]">
+    <h3></h3>
+    <div class="text-content">
+            </div>
+    <figure class="flex justify-center">
+        <img class="image-content" src="/wp-content/uploads/2024/04/u3_l22_1.png" alt="">
+    </figure>
+</div>
+<div id="" class="text-content block-content bullet">
+    <h3></h3>
+    <ul class="text-content flex   flex-col flex-nowrap gap-x-[18px] gap-y-[20px]" style="margin-left: 0px;">
+                    <li class="flex flex-row gap-x-[15px] lg:gap-x-[40px] items-start w-full" style="list-style:none;">
+                <div class="w-[10%] lg:w-[8%]">
+                                    </div>
+                <div class="flex w-[90%] lg:w-[92%] gap-x-[20px]">
+                                            <span>
+                            8.
+                        </span>
+                                        <div class="list-content flex flex-col w-fit">
+                        <p>We need to translate our XML data into something that RStudio recognizes. The <span style="font-size: 18px; color: #21437f; font-weight: bold; font-family: Consolas;"><strong>xmlParse()</strong></span> function will do this for us. Run the following line of code to translate our data into something RStudio/Posit Cloud will recognize.</p>
+                    </div>
+                </div>
+            </li>
+            </ul>
+</div>
+<div id="" class="text-content block-content mt-[-5rem]">
+    <h3></h3>
+    <div class="text-content pb-[50px]">
+            </div>
+    <div class="relative">
+        <button class="code_button" onclick="copy(this)">Copy code</button>
+        <pre class="code-container">
+            <code class="code-content language-html">
+                </code>
+        </pre>
+    </div>
+</div>
+
+<div id="" class="text-content block-content bullet">
+    <h3></h3>
+    <ul class="text-content flex   flex-col flex-nowrap gap-x-[18px] gap-y-[20px]" style="margin-left: 0px;">
+                    <li class="flex flex-row gap-x-[15px] lg:gap-x-[40px] items-start w-full" style="list-style:none;">
+                <div class="w-[10%] lg:w-[8%]">
+                                    </div>
+                <div class="flex w-[90%] lg:w-[92%] gap-x-[20px]">
+                                            <span>
+                            9.
+                        </span>
+                                        <div class="list-content flex flex-col w-fit">
+                        <p>Ask students: &#8220;How is RStudio recognizing our volunteers data now?&#8221; <span style="font-size: 18px; color: #acacad; font-weight: bold;"><strong><em>Answers will vary but students should see that RStudio/Posit Cloud recognizes our data as an XML file. Their Environment pane should show the data as an &#8216;XMLInternalDocument&#8217;.</em></strong></span></p>
+                    </div>
+                </div>
+            </li>
+            </ul>
+</div>
+<div id="" class="text-content block-content mt-[-5rem]">
+    <h3></h3>
+    <div class="text-content">
+            </div>
+    <figure class="flex justify-center">
+        <img class="image-content" src="/wp-content/uploads/2024/04/u3_l22_2.png" alt="">
+    </figure>
+</div>
+<div id="" class="text-content block-content bullet">
+    <h3></h3>
+    <ul class="text-content flex   flex-col flex-nowrap gap-x-[18px] gap-y-[20px]" style="margin-left: 0px;">
+                    <li class="flex flex-row gap-x-[15px] lg:gap-x-[40px] items-start w-full" style="list-style:none;">
+                <div class="w-[10%] lg:w-[8%]">
+                                    </div>
+                <div class="flex w-[90%] lg:w-[92%] gap-x-[20px]">
+                                            <span>
+                            10.
+                        </span>
+                                        <div class="list-content flex flex-col w-fit">
+                        <p>We&#8217;re getting closer – Rstudio now recognizes our data as an XML file. Let&#8217;s do one final translation by using the <span style="font-size: 18px; color: #21437f; font-weight: bold; font-family: Consolas;"><strong>xmlToDataFrame()</strong></span> function to translate our xml file into an R data frame. Run the code below:</p>
+                    </div>
+                </div>
+            </li>
+            </ul>
+</div>
+<div id="" class="text-content block-content mt-[-5rem]">
+    <h3></h3>
+    <div class="text-content pb-[50px]">
+            </div>
+    <div class="relative">
+        <button class="code_button" onclick="copy(this)">Copy code</button>
+        <pre class="code-container">
+            <code class="code-content language-html">
+                </code>
+        </pre>
+    </div>
+</div>
+
+<div id="" class="text-content block-content bullet">
+    <h3></h3>
+    <ul class="text-content flex   flex-col flex-nowrap gap-x-[18px] gap-y-[20px]" style="margin-left: 0px;">
+                    <li class="flex flex-row gap-x-[15px] lg:gap-x-[40px] items-start w-full" style="list-style:none;">
+                <div class="w-[10%] lg:w-[8%]">
+                                    </div>
+                <div class="flex w-[90%] lg:w-[92%] gap-x-[20px]">
+                                            <span>
+                            11.
+                        </span>
+                                        <div class="list-content flex flex-col w-fit">
+                        <p>Ask students: &#8220;What happened when we translated our xml file into an R data frame?&#8221; <span style="font-size: 18px; color: #acacad; font-weight: bold;"><strong><em>Answers will vary but the data should look familiar now – it displays in the Environment pane like datasets we have worked with throughout the year (</em></strong><span style="font-size: 18px; color: #21437f; font-weight: bold; font-family: Consolas;">cdc</span><strong><em>, </em></strong><span style="font-size: 18px; color: #21437f; font-weight: bold; font-family: Consolas;">atus</span><strong><em>, </em></strong><span style="font-size: 18px; color: #21437f; font-weight: bold; font-family: Consolas;">slasher</span><strong><em>, and</em></strong> <span style="font-size: 18px; color: #21437f; font-weight: bold; font-family: Consolas;">titanic</span><strong><em>).</em></strong></span></p>
+                    </div>
+                </div>
+            </li>
+            </ul>
+</div>
+<div id="" class="text-content block-content mt-[-5rem]">
+    <h3></h3>
+    <div class="text-content">
+            </div>
+    <figure class="flex justify-center">
+        <img class="image-content" src="/wp-content/uploads/2024/04/u3_l22_3.png" alt="">
+    </figure>
+</div>
+<div id="" class="text-content block-content bullet">
+    <h3></h3>
+    <ul class="text-content flex   flex-col flex-nowrap gap-x-[18px] gap-y-[20px]" style="margin-left: 0px;">
+                    <li class="flex flex-row gap-x-[15px] lg:gap-x-[40px] items-start w-full" style="list-style:none;">
+                <div class="w-[10%] lg:w-[8%]">
+                                    </div>
+                <div class="flex w-[90%] lg:w-[92%] gap-x-[20px]">
+                                            <span>
+                            12.
+                        </span>
+                                        <div class="list-content flex flex-col w-fit">
+                        <p>Have students View the <span style="font-size: 18px; color: #21437f; font-weight: bold; font-family: Consolas;">volunteers</span> data and fill in their table in <a href="/wp-content/uploads/2024/07/LMR_U3_L22_A.pdf">LMR_U3_L22_A</a>.</p>
+                    </div>
+                </div>
+            </li>
+            </ul>
+</div>
+<div id="" class="text-content block-content mt-[-5rem]">
+    <h3></h3>
+    <div class="text-content">
+            </div>
+    <figure class="flex justify-center">
+        <img class="image-content" src="/wp-content/uploads/2024/04/u3_l22_4.png" alt="">
+    </figure>
+</div>
+<div id="" class="text-content block-content bullet">
+    <h3></h3>
+    <ul class="text-content flex   flex-col flex-nowrap gap-x-[18px] gap-y-[20px]" style="margin-left: 0px;">
+                    <li class="flex flex-row gap-x-[15px] lg:gap-x-[40px] items-start w-full" style="list-style:none;">
+                <div class="w-[10%] lg:w-[8%]">
+                                    </div>
+                <div class="flex w-[90%] lg:w-[92%] gap-x-[20px]">
+                                            <span>
+                            13.
+                        </span>
+                                        <div class="list-content flex flex-col w-fit">
+                        <p>Provide time for students to complete the handout individually.</p>
+                    </div>
+                </div>
+            </li>
+                    <li class="flex flex-row gap-x-[15px] lg:gap-x-[40px] items-start w-full" style="list-style:none;">
+                <div class="w-[10%] lg:w-[8%]">
+                                        <img class="w-full mt-[10px] lg:mt-0" src="/wp-content/uploads/2023/06/Discussion-1.png" alt="">
+                                    </div>
+                <div class="flex w-[90%] lg:w-[92%] gap-x-[20px]">
+                                            <span>
+                            14.
+                        </span>
+                                        <div class="list-content flex flex-col w-fit">
+                        <p>Then, conduct a whole class discussion regarding student responses to the questions on page 2 of the handout.</p>
+                    </div>
+                </div>
+            </li>
+                    <li class="flex flex-row gap-x-[15px] lg:gap-x-[40px] items-start w-full" style="list-style:none;">
+                <div class="w-[10%] lg:w-[8%]">
+                                    </div>
+                <div class="flex w-[90%] lg:w-[92%] gap-x-[20px]">
+                                            <span>
+                            15.
+                        </span>
+                                        <div class="list-content flex flex-col w-fit">
+                        <p>Distribute the <em>There and Back Again: From Data Tables to XML </em>(<a href="/wp-content/uploads/2024/07/LMR_U3_L22_B.pdf">LMR_U3_L22_B</a>) to student teams and allow them time to complete it.</p>
+                    </div>
+                </div>
+            </li>
+            </ul>
+</div>
+<div id="" class="text-content block-content mt-[-5rem]">
+    <h3></h3>
+    <div class="text-content">
+            </div>
+    <figure class="flex justify-center">
+        <img class="image-content" src="/wp-content/uploads/2024/04/lmr_u3_l22_b.png" alt="">
+    </figure>
+</div>
+<div id="" class="text-content block-content bullet">
+    <h3></h3>
+    <ul class="text-content flex   flex-col flex-nowrap gap-x-[18px] gap-y-[20px]" style="margin-left: 0px;">
+                    <li class="flex flex-row gap-x-[15px] lg:gap-x-[40px] items-start w-full" style="list-style:none;">
+                <div class="w-[10%] lg:w-[8%]">
+                                    </div>
+                <div class="flex w-[90%] lg:w-[92%] gap-x-[20px]">
+                                            <span>
+                            16.
+                        </span>
+                                        <div class="list-content flex flex-col w-fit">
+                        <p>Once teams have finished, teams will guide you to write the correct XML code.</p>
+                    </div>
+                </div>
+            </li>
+                    <li class="flex flex-row gap-x-[15px] lg:gap-x-[40px] items-start w-full" style="list-style:none;">
+                <div class="w-[10%] lg:w-[8%]">
+                                    </div>
+                <div class="flex w-[90%] lg:w-[92%] gap-x-[20px]">
+                                            <span>
+                            17.
+                        </span>
+                                        <div class="list-content flex flex-col w-fit">
+                        <p>Using a <em>Whip Around</em>, teams will tell you the first line of the XML code you need to write. Teams waiting their turn will check if the team is guiding you correctly. If not, they need to stop you and propose their line of code. You may not continue writing the lines of code until all teams are in agreement.</p>
+                    </div>
+                </div>
+            </li>
+            </ul>
+</div>
+<div id="Class Scribes" class="text-content block-content bullet">
+    <h3>Class Scribes</h3>
+    <ul class="text-content flex   flex-col flex-nowrap gap-x-[18px] gap-y-[20px]" style="margin-left: 0px;">
+                    <li class="flex flex-row gap-x-[15px] lg:gap-x-[40px] items-start w-full" style="list-style:none;">
+                <div class="w-[10%] lg:w-[8%]">
+                                        <img class="w-full mt-[10px] lg:mt-0" src="/wp-content/uploads/2023/06/Class-Scribes-1.png" alt="">
+                                    </div>
+                <div class="flex w-[90%] lg:w-[92%] gap-x-[20px]">
+                                            <div class="w-[15px]"></div>
+                                        <div class="list-content flex flex-col w-fit">
+                        <p>One team of students will give a brief talk to discuss what they think the 3 most important topics of the day were.</p>
+                    </div>
+                </div>
+            </li>
+            </ul>
+</div>
+<div id="Homework & Next Day" class="text-content block-content bullet">
+    <h3>Homework & Next Day</h3>
+    <ul class="text-content flex   flex-col flex-nowrap gap-x-[18px] gap-y-[20px]" style="margin-left: 0px;">
+                    <li class="flex flex-row gap-x-[15px] lg:gap-x-[40px] items-start w-full" style="list-style:none;">
+                <div class="w-[10%] lg:w-[8%]">
+                                    </div>
+                <div class="flex w-[90%] lg:w-[92%] gap-x-[20px]">
+                                            <div class="w-[15px]"></div>
+                                        <div class="list-content flex flex-col w-fit">
+                        <p>Students will continue to collect data using the class’s Participatory Sensing campaign (see Lessons 17-19). They will analyze the data the next day during the practicum.</p>
+                    </div>
+                </div>
+            </li>
+            </ul>
+</div>    <script>code = `volunteers <- "
+<volunteers_data>
+<volunteer>
+<name>Dakota</name>
+<organization>No Kill LA (NKLA)</organization>
+<time>3</time>
+</volunteer>
+<volunteer>
+<name>Hayden</name>
+<organization>Yosemite Foundation</organization>
+<time>3</time>
+</volunteer>
+<volunteer>
+<name>Charlie</name>
+<organization>Yosemite Foundation</organization>
+<time>2</time>
+</volunteer>
+<volunteer>
+<name>Emerson</name>
+<organization>City of Hope</organization>
+<time>1</time>
+</volunteer>
+<volunteer>
+<name>Jessie</name>
+<organization>Wounded Warrior Project</organization>
+<time>2</time>
+</volunteer>
+<volunteer>
+<name>Sawyer</name>
+<organization>City of Hope</organization>
+<time>2</time>
+</volunteer>
+<volunteer>
+<name>Kamryn</name>
+<organization>No Kill LA (NKLA)</organization>
+<time>1</time>
+</volunteer>
+<volunteer>
+<name>London</name>
+<organization>LA Regional Food Bank</organization>
+<time>4</time>
+</volunteer>
+</volunteers_data>"`
+        contents = document.querySelectorAll(".code-content")
+        contents["0"].innerHTML = code</script>
+    <script>code = `volunteers <- xmlParse(volunteers)`
+        contents = document.querySelectorAll(".code-content")
+        contents["1"].innerHTML = code</script>
+    <script>code = `volunteers <- xmlToDataFrame(volunteers)`
+        contents = document.querySelectorAll(".code-content")
+        contents["2"].innerHTML = code</script>
+<script>function copy(a) {
+        codeBlock = a.nextElementSibling.querySelector("code").innerHTML;
+        noRegex = codeBlock.replaceAll("<", "<").replaceAll(">", ">").replaceAll(""", '"')
+        navigator.clipboard.writeText(noRegex);
+        a.textContent = "Code Copied"
+        setTimeout(() => {
+            a.textContent = "Copy code"
+        }, 800);
+    }</script>
+</div>
+</main>
+
+<footer>
+    <div class="container">
+        <!-- Footer Navigations -->
+        <div class="grid grid-cols-2 gap-2">
+            <div>< Previous</div>
+            <!-- ... -->
+            <div>Next ></div>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-2">
+            <div>Lorem Ipsum Dolor</div>
+            <!-- ... -->
+            <div>Lorem Ipsum Dolor</div>
+        </div>
+
+        <p class="mt-10">
+            Lorem ipsum dolor sit amet consectetur. 
+            Lectus et faucibus sagittis non consectetur adipiscing. 
+            Sit tellus lectus est non ut adipiscing. 
+            Amet risus dignissim tellus id id felis enim sapien mauris. 
+            Et quis dignissim nisi euismod.
+        </p>
+    </div>
+</footer>
+
+        <span class="ssp-id" style="display:none">767</span>
+		<style id="core-block-supports-inline-css" type="text/css">/**
+ * Core styles: block-supports
+ */</style>
+<script type="text/javascript" src="/wp-content/themes/ids-ucla/assets/js/main.js?ver=1738264144" id="theme-main-script-js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js?config=default&amp;ver=1.3.12" id="mathjax-js"></script>
+</body>
+
+
+<script>span = document.querySelectorAll("span")
+    span.forEach(element => {
+        if (element.style.color == 'rgb(0, 0, 0)' || element.style.color == '#000')
+            element.style.color = rgba(26, 31, 37, 0.60);
+    });</script>
+</html>
