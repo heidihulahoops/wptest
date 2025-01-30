@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?><feed
+	xmlns="http://www.w3.org/2005/Atom"
+	xmlns:thr="http://purl.org/syndication/thread/1.0"
+	xml:lang="en-US"
+	>
+	<title type="text">ucla.alkali.cloud</title>
+	<subtitle type="text"></subtitle>
+
+	<updated>2023-08-02T15:35:53Z</updated>
+
+	<link rel="alternate" type="text/html" href="/" />
+	<id>/feed/atom/</id>
+	<link rel="self" type="application/atom+xml" href="/feed/atom/" />
+
+	<generator uri="https://wordpress.org/" version="6.7.1">WordPress</generator>
+	<entry>
+		<author>
+			<name>antonio@alkalidesigns.com</name>
+					</author>
+
+		<title type="html"><![CDATA[Welcome to the Gutenberg Editor]]></title>
+		<link rel="alternate" type="text/html" href="/2023/08/02/welcome-to-the-gutenberg-editor/" />
+
+		<id>/?p=191</id>
+		<updated>2023-08-02T15:35:53Z</updated>
+		<published>2023-08-02T15:35:51Z</published>
+		<category scheme="/" term="Uncategorized" />
+		<summary type="html"><![CDATA[The goal of this new editor is to make adding rich content to WordPress simple and enjoyable. This whole post is composed of pieces of content—somewhat similar to LEGO bricks—that you can move around and interact with. Move your cursor around and you’ll notice the different blocks light up with outlines and arrows. Press the [&#8230;]]]></summary>
+
+					<content type="html" xml:base="/2023/08/02/welcome-to-the-gutenberg-editor/"><![CDATA[
+<div class="wp-block-cover alignwide is-light"><span aria-hidden="true" class="wp-block-cover__background has-background-dim"></span><img decoding="async" class="wp-block-cover__image-background" src="https://cldup.com/Fz-ASbo2s3.jpg" data-object-fit="cover"/><div class="wp-block-cover__inner-container is-layout-flow wp-block-cover-is-layout-flow">
+<p class="has-text-align-center has-white-color has-text-color has-large-font-size">Of Mountains &amp; Printing Presses</p>
+</div></div>
+
+
+
+<p>The goal of this new editor is to make adding rich content to WordPress simple and enjoyable. This whole post is composed of <em>pieces of content</em>—somewhat similar to LEGO bricks—that you can move around and interact with. Move your cursor around and you’ll notice the different blocks light up with outlines and arrows. Press the arrows to reposition blocks quickly, without fearing about losing things in the process of copying and pasting.</p>
+
+
+
+<p>What you are reading now is a <strong>text block</strong> the most basic block of all. The text block has its own controls to be moved freely around the post&#8230;</p>
+
+
+
+<p class="has-text-align-right">&#8230; like this one, which is right aligned.</p>
+
+
+
+<p>Headings are separate blocks as well, which helps with the outline and organization of your content.</p>
+
+
+
+<h2 class="wp-block-heading">A Picture is Worth a Thousand Words</h2>
+
+
+
+<p>Handling images and media with the utmost care is a primary focus of the new editor. Hopefully, you’ll find aspects of adding captions or going full-width with your pictures much easier and robust than before.</p>
+
+
+<div class="wp-block-image">
+<figure class="aligncenter"><img decoding="async" src="https://cldup.com/cXyG__fTLN.jpg" alt="Beautiful landscape"/><figcaption class="wp-element-caption">If your theme supports it, you’ll see the &#8220;wide&#8221; button on the image toolbar. Give it a try.</figcaption></figure></div>
+
+
+<p>Try selecting and removing or editing the caption, now you don’t have to be careful about selecting the image or other text by mistake and ruining the presentation.</p>
+
+
+
+<h2 class="wp-block-heading">The <em>Inserter</em> Tool</h2>
+
+
+
+<p>Imagine everything that WordPress can do is available to you quickly and in the same place on the interface. No need to figure out HTML tags, classes, or remember complicated shortcode syntax. That’s the spirit behind the inserter—the <code>(+)</code> button you’ll see around the editor—which allows you to browse all available content blocks and add them into your post. Plugins and themes are able to register their own, opening up all sort of possibilities for rich editing and publishing.</p>
+
+
+
+<p>Go give it a try, you may discover things WordPress can already add into your posts that you didn’t know about. Here’s a short list of what you can currently find there:</p>
+
+
+
+<ul class="wp-block-list">
+<li>Text &amp; Headings</li>
+
+
+
+<li>Images &amp; Videos</li>
+
+
+
+<li>Galleries</li>
+
+
+
+<li>Embeds, like YouTube, Tweets, or other WordPress posts.</li>
+
+
+
+<li>Layout blocks, like Buttons, Hero Images, Separators, etc.</li>
+
+
+
+<li>And <em>Lists</em> like this one of course <img src="https://s.w.org/images/core/emoji/15.0.3/72x72/1f642.png" alt="🙂" class="wp-smiley" style="height: 1em; max-height: 1em;" /></li>
+</ul>
+
+
+
+<hr class="wp-block-separator has-css-opacity"/>
+
+
+
+<h2 class="wp-block-heading">Visual Editing</h2>
+
+
+
+<p>A huge benefit of blocks is that you can edit them in place and manipulate your content directly. Instead of having fields for editing things like the source of a quote, or the text of a button, you can directly change the content. Try editing the following quote:</p>
+
+
+
+<blockquote class="wp-block-quote is-layout-flow wp-block-quote-is-layout-flow">
+<p>The editor will endeavor to create a new page and post building experience that makes writing rich posts effortless, and has “blocks” to make it easy what today might take shortcodes, custom HTML, or “mystery meat” embed discovery.</p>
+<cite>Matt Mullenweg, 2017</cite></blockquote>
+
+
+
+<p>The information corresponding to the source of the quote is a separate text field, similar to captions under images, so the structure of the quote is protected even if you select, modify, or remove the source. It’s always easy to add it back.</p>
+
+
+
+<p>Blocks can be anything you need. For instance, you may want to add a subdued quote as part of the composition of your text, or you may prefer to display a giant stylized one. All of these options are available in the inserter.</p>
+
+
+
+<figure class="wp-block-gallery has-nested-images columns-2 is-cropped wp-block-gallery-1 is-layout-flex wp-block-gallery-is-layout-flex">
+<figure class="wp-block-image size-large"><img decoding="async" src="https://cldup.com/n0g6ME5VKC.jpg" alt=""/></figure>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" src="https://cldup.com/ZjESfxPI3R.jpg" alt=""/></figure>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" src="https://cldup.com/EKNF8xD2UM.jpg" alt=""/></figure>
+</figure>
+
+
+
+<p>You can change the amount of columns in your galleries by dragging a slider in the block inspector in the sidebar.</p>
+
+
+
+<h2 class="wp-block-heading">Media Rich</h2>
+
+
+
+<p>If you combine the new <strong>wide</strong> and <strong>full-wide</strong> alignments with galleries, you can create a very media rich layout, very quickly:</p>
+
+
+
+<figure class="wp-block-image alignfull"><img decoding="async" src="https://cldup.com/8lhI-gKnI2.jpg" alt="Accessibility is important — don’t forget image alt attribute"/></figure>
+
+
+
+<p>Sure, the full-wide image can be pretty big. But sometimes the image is worth it.</p>
+
+
+
+<figure class="wp-block-gallery alignwide has-nested-images columns-default is-cropped wp-block-gallery-2 is-layout-flex wp-block-gallery-is-layout-flex">
+<figure class="wp-block-image size-large"><img decoding="async" src="https://cldup.com/_rSwtEeDGD.jpg" alt=""/></figure>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" src="https://cldup.com/L-cC3qX2DN.jpg" alt=""/></figure>
+</figure>
+
+
+
+<p>The above is a gallery with just two images. It’s an easier way to create visually appealing layouts, without having to deal with floats. You can also easily convert the gallery back to individual images again, by using the block switcher.</p>
+
+
+
+<p>Any block can opt into these alignments. The embed block has them also, and is responsive out of the box:</p>
+
+
+
+<figure class="wp-block-embed alignwide is-type-video is-provider-vimeo wp-block-embed-vimeo wp-has-aspect-ratio wp-embed-aspect-16-9"><div class="wp-block-embed__wrapper">
+<iframe title="The Mountain" src="https://player.vimeo.com/video/22439234?dnt=1&amp;app_id=122963" width="500" height="281" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write"></iframe>
+</div></figure>
+
+
+
+<p>You can build any block you like, static or dynamic, decorative or plain. Here’s a pullquote block:</p>
+
+
+
+<figure class="wp-block-pullquote"><blockquote><p>Code is Poetry</p><cite>The WordPress community</cite></blockquote></figure>
+
+
+
+<p class="has-text-align-center">
+	<em>
+		If you want to learn more about how to build additional blocks, or if you are interested in helping with the project, head over to the <a href="https://github.com/WordPress/gutenberg">GitHub repository</a>.	</em>
+</p>
+
+
+
+<div class="wp-block-button aligncenter"><a class="wp-block-button__link wp-element-button" href="https://github.com/WordPress/gutenberg">Help build Gutenberg</a></div>
+
+
+
+<hr class="wp-block-separator has-css-opacity"/>
+
+
+
+<p class="has-text-align-center">Thanks for testing Gutenberg!</p>
+
+
+
+<p class="has-text-align-center"><img src="https://s.w.org/images/core/emoji/15.0.3/72x72/1f44b.png" alt="👋" class="wp-smiley" style="height: 1em; max-height: 1em;" /></p>
+]]></content>
+		
+					<link rel="replies" type="text/html" href="/2023/08/02/welcome-to-the-gutenberg-editor/#comments" thr:count="0" />
+			<link rel="replies" type="application/atom+xml" href="/2023/08/02/welcome-to-the-gutenberg-editor/feed/atom/" thr:count="0" />
+			<thr:total>0</thr:total>
+			</entry>
+		<entry>
+		<author>
+			<name>Nicholas</name>
+							<uri>/</uri>
+						</author>
+
+		<title type="html"><![CDATA[Some Useful Links for You to Get Started]]></title>
+		<link rel="alternate" type="text/html" href="/2023/05/30/welcome-to-cloudways/" />
+
+		<id>/?p=1</id>
+		<updated>2023-05-30T00:00:00Z</updated>
+		<published>2023-05-30T00:00:00Z</published>
+		<category scheme="/" term="Uncategorized" />
+		<summary type="html"><![CDATA[It seems like you’re running a default WordPress website. Here are a few useful links to get you started: Migration How to use WordPress Migrator Plugin? Migrate WordPress from Siteground to Cloudways Migrate WordPress from GoDaddy to Cloudways General How do I take my website live from Cloudways? How to manage WordPress via WP-CLI on [&#8230;]]]></summary>
+
+					<content type="html" xml:base="/2023/05/30/welcome-to-cloudways/"><![CDATA[<p>It seems like you’re running a default WordPress website. Here are a few useful links to get you started:</p>
+			<h3>Migration</h3>
+			<ul>
+				<li><a href="https://support.cloudways.com/how-to-migrate-wordpress-to-cloudways/?utm_source=WordPress&amp;Staging&amp;Sites&amp;utm_medium=WP&amp;Staging&amp;utm_campaign=cloudways-wp" target="_blank" rel="noopener, noindex, nofollow noopener">How to use WordPress Migrator Plugin?</a></li>
+				<li><a href="https://support.cloudways.com/siteground-to-cloudways-wordpress-migration/?utm_source=WordPress&amp;&amp;Sites&amp;utm_medium=WP&amp;&amp;utm_campaign=cloudways-wp" target="_blank" rel="noopener, noindex, nofollow noopener">Migrate WordPress from Siteground to Cloudways</a></li>
+				<li><a href="https://support.cloudways.com/godaddy-to-cloudways-wordpress-migration/?utm_source=WordPress&amp;&amp;Sites&amp;utm_medium=WP&amp;&amp;utm_campaign=cloudways-wp" target="_blank" rel="noopener, noindex, nofollow noopener">Migrate WordPress from GoDaddy to Cloudways</a></li>
+				</ul>
+				<h3>General</h3>
+				<ul>
+					<li><a href="https://support.cloudways.com/how-do-i-take-my-website-live-from-cloudways/?utm_source=WordPress&amp;&amp;Sites&amp;utm_medium=WP&amp;&amp;utm_campaign=cloudways-wp" target="_blank" rel="noopener, noindex, nofollow noopener">How do I take my website live from Cloudways?</a></li>
+					<li><a href="https://support.cloudways.com/how-to-manage-wordpress-with-wp-cli/?utm_source=WordPress&amp;&amp;Sites&amp;utm_medium=WP&amp;&amp;utm_campaign=cloudways-wp" target="_blank" rel="noopener, noindex, nofollow noopener">How to manage WordPress via WP-CLI on Cloudways?</a></li>
+					<li><a href="https://support.cloudways.com/how-to-setup-a-wordpress-multisite-on-cloudways/?utm_source=WordPress&amp;&amp;Sites&amp;utm_medium=WP&amp;&amp;utm_campaign=cloudways-wp" target="_blank" rel="noopener, noindex, nofollow noopener">How to configure WordPress Multisite on Cloudways?</a></li>
+					<li><a href="https://support.cloudways.com/mysql-database-access-options/?utm_source=WordPress&amp;&amp;Sites&amp;utm_medium=WP&amp;&amp;utm_campaign=cloudways-wp" target="_blank" rel="noopener, noindex, nofollow noopener">How to access your databases on Cloudways?</a></li>
+					</ul>
+					<h3>Performance</h3>
+					<ul>
+						<li><a href="https://support.cloudways.com/breeze-wordpress-cache-configuration/?utm_source=WordPress&amp;&amp;Sites&amp;utm_medium=WP&amp;&amp;utm_campaign=cloudways-wp" target="_blank" rel="noopener, noindex, nofollow noopener">How to install and configure Breeze WordPress cache plugin?</a></li>
+						<li><a href="https://support.cloudways.com/wordpress-cloudways-cdn/?utm_source=WordPress&amp;&amp;Sites&amp;utm_medium=WP&amp;&amp;utm_campaign=cloudways-wp" target="_blank" rel="noopener, noindex, nofollow noopener">How to integrate CloudwaysCDN with your WordPress website?</a></li>
+						<li><a href="https://support.cloudways.com/how-to-configure-wp-rocket-plugin-wordpress/?utm_source=WordPress&amp;&amp;Sites&amp;utm_medium=WP&amp;&amp;utm_campaign=cloudways-wp" target="_blank" rel="noopener, noindex, nofollow noopener">How to configure WP Rocket plugin for WordPress?</a></li>
+						</ul>
+						<h3>Security</h3>
+						<ul>
+							<li><a href="https://support.cloudways.com/what-can-i-do-with-an-htaccess-file/?utm_source=WordPress&amp;&amp;Sites&amp;utm_medium=WP&amp;&amp;utm_campaign=cloudways-wp" target="_blank" rel="noopener, noindex, nofollow noopener" data-wplink-edit="true">What can I do with an .htaccess file?</a></li>
+							<li><a href="https://www.cloudways.com/blog/add-free-ssl-certificate-to-wordpress-websites/?utm_source=WordPress&amp;&amp;Sites&amp;utm_medium=WP&amp;&amp;utm_campaign=cloudways-wp" target="_blank" rel="noopener, noindex, nofollow noopener">Add free SSL certificate to WordPress websites</a></li>
+							<li><a href="https://support.cloudways.com/how-to-set-up-sucuri-antivirus-website-monitoring/?utm_source=WordPress&amp;&amp;Sites&amp;utm_medium=WP&amp;&amp;utm_campaign=cloudways-wp" target="_blank" rel="noopener, noindex, nofollow noopener">How to setup Sucuri on WordPress websites at Cloudways?</a></li>
+							</ul>
+							<h3>Email</h3>
+							<ul>
+								<li><a href="https://support.cloudways.com/emailing-with-cloudways/?utm_source=WordPress&amp;&amp;Sites&amp;utm_medium=WP&amp;&amp;utm_campaign=cloudways-wp&amp;utm_campaign=cloudways-wp" target="_blank" rel="noopener, noindex, nofollow noopener">Which email add-on should I use?</a></li>
+								<li><a href="https://support.cloudways.com/how-to-activate-rackspace-email-addon/?utm_source=WordPress&amp;&amp;Sites&amp;utm_medium=WP&amp;&amp;utm_campaign=cloudways-wp&amp;utm_campaign=cloudways-wp" target="_blank" rel="noopener, noindex, nofollow noopener">How to activate Rackspace email addon?</a></li>
+								<li><a href="https://support.cloudways.com/how-to-activate-elasticemail-addon/?utm_source=WordPress&amp;&amp;Sites&amp;utm_medium=WP&amp;&amp;utm_campaign=cloudways-wp" target="_blank" rel="noopener, noindex, nofollow noopener">How to activate the Elastic email add-on?</a></li>
+								</ul>
+
+								
+								<h4 class="wp-block-heading">Our Partners</h4>
+								
+
+								
+								<figure class="wp-block-image"><a href="https://mainwp.com/?utm_source=cloudways-partner&amp;utm_campaign=cloudways" target="_blank" rel="noreferrer, noopener, noindex, nofollow noopener"><img decoding="async" src="https://s3.amazonaws.com/cloudways-static-content/applications/wordpress/mainWP-Banner-1.jpg" alt="" class="wp-image-15"/></a></figure>
+								
+
+								
+								<figure class="wp-block-image"><a href="https://oceanwp.org/?utm_source=cloudways-partner&amp;utm_campaign=cloudways" target="_blank" rel="noreferrer, noopener, noindex, nofollow noopener"><img decoding="async" src="https://s3.amazonaws.com/cloudways-static-content/applications/wordpress/OceanWP-Banner.jpg" alt="" class="wp-image-20"/></a></figure>
+								
+
+								
+								<h4 class="wp-block-heading">Join The Community Forum<br></h4>
+									
+
+									
+									<figure class="wp-block-image"><a href="https://community.cloudways.com/?utm_source=cloudways-wp&amp;utm_medium=cloudways&amp;utm_campaign=cloudways-wp" target="_blank" rel="noreferrer, noopener, noindex, nofollow noopener"><img decoding="async" src="https://s3.amazonaws.com/cloudways-static-content/applications/wordpress/cloudways-community1.jpg" alt="" class="wp-image-23"/></a></figure>
+									
+
+</ul>]]></content>
+		
+					<link rel="replies" type="text/html" href="/2023/05/30/welcome-to-cloudways/#comments" thr:count="1" />
+			<link rel="replies" type="application/atom+xml" href="/2023/05/30/welcome-to-cloudways/feed/atom/" thr:count="1" />
+			<thr:total>1</thr:total>
+			</entry>
+	</feed>
